@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -22,15 +24,17 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav me-autu">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        
+
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Customer" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="User" asp-area="" asp-controller="Cart" asp-action="Index">Cart</a>
                         </li>
 
+                        @if(User.IsInRole(SD.Role_Admin))
+                        {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Content Managment
@@ -39,22 +43,22 @@
                             <ul class="dropdown-menu">
                                 <li class="nav-item">
                                     <a class="dropdown-item" asp-area="Admin" asp-area="" asp-controller="Category" asp-action="Index">Category</a>
-                                </li>          
-                                
+                                </li>
+
                                 <li class="nav-item">
                                     <a class="dropdown-item" asp-area="Admin" asp-area="" asp-controller="Product" asp-action="Index">Product</a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
-                                
                             </ul>
                         </li>
+                        }
                     </ul>
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-3 my-5">
             <partial name="_Notification" />
             @RenderBody()
         </main>
