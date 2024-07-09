@@ -1,21 +1,23 @@
-﻿using BulkyBook.DataAccess.Repository.IRepository;
+﻿// CategoryRepository.cs
+using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.DataAcess.Data;
 using BulkyBook.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBook.DataAccess.Repository
 {
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
+
         public CategoryRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
+        }
+
+        public Category Get(int id)
+        {
+            return _db.Categories.FirstOrDefault(c => c.Id == id);
         }
 
         public void Update(Category obj)

@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using BulkyBook.Models;
+using Microsoft.AspNetCore.Identity;
+using System;
 using System.Threading.Tasks;
 
 namespace BulkyBook.DataAccess.Repository.IRepository
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
-        ICategoryRepository Category{ get; }
+        ICategoryRepository Category { get; }
         IProductRepository Product { get; }
-
+        ICartItemRepository CartItem { get; }
+        IOrderDetailRepository OrderDetail { get; }
+        IOrderRepository Order { get; }
+        IManageOrdersRepository ManageOrders { get; }
+        IApplicationUserRepository ApplicationUser { get; }
         void Save();
+        Task SaveAsync();
     }
 }

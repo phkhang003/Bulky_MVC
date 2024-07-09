@@ -2,6 +2,7 @@ using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Linq;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
@@ -17,15 +18,46 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string searchString)
         {
-            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category");
+            IEnumerable<Product> productList;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                productList = _unitOfWork.Product.GetAll(includeProperties: "Category")
+                                .Where(p => p.Title.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                productList = _unitOfWork.Product.GetAll(includeProperties: "Category");
+            }
+
             return View(productList);
         }
 
+        public IActionResult SearchProducts(string searchString)
+        {
+            IEnumerable<Product> productList;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                productList = _unitOfWork.Product.GetAll(includeProperties: "Category")
+                                .Where(p => p.Title.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                productList = Enumerable.Empty<Product>();
+            }
+
+            var titles = productList.Select(p => p.Title).ToList();
+            return Json(titles);
+        }
+
+
+
         public IActionResult Details(int productId)
         {
-            Product product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category");
+            Product product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == productId, includeProperties: "Category");
             return View(product);
         }
 

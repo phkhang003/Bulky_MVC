@@ -4,24 +4,68 @@
 @inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a id="manage" class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button id="logout" type="submit" class="nav-link btn btn-link border-0">Logout</button>
+        <form id="searchForm" class="d-flex ms-auto" asp-controller="Home" asp-action="Index" method="get">
+            <input id="searchBox" class="form-control me-2" type="search" placeholder="Search products..." aria-label="Search" name="searchString" autocomplete="on">
+            <button class="btn btn-outline-light" type="submit">Search</button>
         </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+        <div id="searchSuggestions" class="list-group position-absolute mt-1 w-100"></div>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a id="manage" class="nav-link " asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button id="logout" type="submit" class="nav-link btn btn-link border-0">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link " id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
 </ul>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#searchInput").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("SearchProducts", "Home", new { area = "Customer" })",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            searchString: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1
+            });
+
+            $("#searchForm").submit(function (event) {
+                event.preventDefault();
+
+                var searchString = $("#searchInput").val();
+
+                $.ajax({
+                    url: "@Url.Action("Index", "Home", new { area = "Customer" })",
+                    type: "GET",
+                    data: { searchString: searchString },
+                    success: function (result) {
+                        $("#productList").html(result);
+                    }
+                });
+            });
+        });
+    </script>
+}

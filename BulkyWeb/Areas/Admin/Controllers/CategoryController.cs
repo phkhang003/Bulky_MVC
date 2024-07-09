@@ -1,11 +1,11 @@
-﻿using BulkyBook.DataAccess.Repository;
-using BulkyBook.DataAccess.Repository.IRepository;
-using BulkyBook.DataAcess.Data;
+﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
@@ -14,6 +14,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public CategoryController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -21,85 +22,74 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            List<Category> objCategoryList = _unitOfWork.Category.GetAll().ToList();
-            return View(objCategoryList);
+            List<Category> categoryList = _unitOfWork.Category.GetAll().ToList();
+            return View(categoryList);
         }
 
         public IActionResult Create()
         {
             return View();
         }
-        [HttpPost]
-        public IActionResult Create(Category obj)
-        {
-            if (obj.Name == obj.DisplayOrder.ToString())
-            {
-                ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
-            }
 
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Category.Add(obj);
-                _unitOfWork.Save();
-                TempData["success"] = "Category created successfully";
-                return RedirectToAction("Index");
-            }
-            return View();
-        }
-
-        public IActionResult Edit(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            Category? categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
-            //Category? categoryFromDb1 = _db.categories.FirstOrDefault(u=>u.Id==id);
-            //Category? categoryFromDb2 = _db.categories.Where(u=>u.Id==id).FirstOrDefault();
-            if (categoryFromDb == null)
-            {
-                return NotFound();
-            }
-            return View(categoryFromDb);
-        }
         [HttpPost]
-        public IActionResult Edit(Category obj)
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Category category)
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Category.Update(obj);
+                _unitOfWork.Category.Add(category);
                 _unitOfWork.Save();
-                TempData["success"] = "Category updated successfully";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
-            return View();
+            return View(category);
         }
 
-        public IActionResult Delete(int? id)
+        public IActionResult Edit(int id)
         {
-            if (id == null || id == 0)
+            var category = _unitOfWork.Category.Get(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            Category? categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
-            if (categoryFromDb == null)
-            {
-                return NotFound();
-            }
-            return View(categoryFromDb);
+            return View(category);
         }
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePOST(int? id)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Category category)
         {
-            Category? obj = _unitOfWork.Category.Get(u => u.Id == id);
-            if (obj == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
+                _unitOfWork.Category.Update(category);
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
             }
-            _unitOfWork.Category.Remove(obj);
+            return View(category);
+        }
+
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Category> categoryList = _unitOfWork.Category.GetAll().ToList();
+            return Json(new { data = categoryList });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var categoryToBeDeleted = _unitOfWork.Category.Get(id);
+            if (categoryToBeDeleted == null)
+            {
+                return Json(new { success = false, message = "Error while deleting" });
+            }
+
+            _unitOfWork.Category.Remove(categoryToBeDeleted);
             _unitOfWork.Save();
-            TempData["success"] = "Category deleted successfully";
-            return RedirectToAction("Index");
+
+            return Json(new { success = true, message = "Delete Successful" });
         }
+
+        #endregion
     }
 }

@@ -1,21 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BulkyBook.Models
 {
     public class CartItem
     {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
-        public decimal UnitPrice { get; set; }
+
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+
+        [Required]
+        public string ApplicationUserId { get; set; }
+
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
+
         public int Quantity { get; set; }
-        public decimal TotalPrice => UnitPrice * Quantity;
-
-        public object Id { get; set; }
-        public object Product { get; set; }
     }
-
 }

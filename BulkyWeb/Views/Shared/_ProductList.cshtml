@@ -1,0 +1,9 @@
+﻿@* @model ienumerable<bulkybook.models.product>
+
+@foreach (var product in model)
+{
+    <a href="@url.action("details", "home", new { productid = product.id })" class="list-group-item list-group-item-action">
+        @product.title
+    </a>
+}
+ *@

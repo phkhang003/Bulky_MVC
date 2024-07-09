@@ -1,0 +1,97 @@
+﻿@model BulkyBook.Models.ViewModels.OrderSummaryViewModel
+
+@{
+    Layout = null;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow border-0 mt-4">
+                <div class="card-header bg-secondary bg-gradient ml-0 py-2">
+                    <div class="row">
+                        <div class="col-12 text-center d-flex justify-content-between align-items-center">
+                            <h2 class="text-white py-2 text-end text-sm-start">order summary</h2>
+                            <a href="@Url.Action("Cart", "ShoppingCart")" class="btn btn-outline-primary text-white fw-semibold btn-sm text-uppercase bg-gradient">
+                                <small>back to cart</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="container text-center">
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <h4 class="fw-bold mb-3 mt-3 text-end text-sm-start"><strong>shipping details:</strong></h4>
+                                    <form asp-action="UpdateShippingDetails" method="post">
+                                        <div class="form-group row mb-3">
+                                            <label for="fullname" class="col-sm-3 col-form-label text-end text-sm-start"><strong>name</strong></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="fullname" name="fullname" class="form-control" value="@Model.Order.ApplicationUser.FullName">
+                                            </div>
+                                        </div>
+                                        <!-- các trường thông tin khác như phone, address, city, state, postal code -->
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="mb-3">
+                                    <h4 class="fw-bold mb-3 mt-3 text-end text-sm-start"><strong>order summary:</strong></h4>
+                                    <ol class="list-group">
+                                        @foreach (var item in Model.OrderDetails)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-start text-end text-sm-start">
+                                                <div class="ms-2 me-auto">
+                                                    <div class="fw-bold">@item.Product.Title</div>
+                                                    quantity: @item.Quantity
+                                                </div>
+                                                <span>@item.Price.ToString("c2")</span>
+                                            </li>
+                                        }
+                                        <li class="list-group-item d-flex justify-content-between align-items-start text-end text-sm-start" style="background-color: floralwhite;">
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold">total(usd)</div>
+                                            </div>
+                                            <span style="color: midnightblue; font-weight: bold;">@Model.Order.OrderTotal.ToString("c2")</span>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <p><strong>estimated arrival date: </strong>@Model.Order.OrderDate.AddDays(7).ToString("MM/dd/yyyy") - @Model.Order.OrderDate.AddDays(14).ToString("MM/dd/yyyy")</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 d-flex justify-content-end align-items-center">
+                            <form id="placeorderform" action="@Url.Action("PlaceOrder", "Payment")" method="post">
+                                <button type="submit" id="placeorderbtn" class="btn btn-primary">place order</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- đoạn mã javascript để xử lý hành vi khi người dùng click vào "place order" -->
+<script>
+    document.getElementById('placeorderform').addEventListener('submit', function (event) {
+        event.preventDefault(); // ngăn chặn hành động mặc định của form
+
+        // thực hiện các xử lý khác nếu cần
+
+        // submit form bằng javascript
+        this.submit();
+    });
+</script>

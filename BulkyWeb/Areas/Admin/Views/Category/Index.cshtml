@@ -1,10 +1,19 @@
-﻿@model List<Category>
+﻿@model List<BulkyBook.Models.Category>
 
-<div class="card shadow border-0 my-4">
+@{
+    ViewData["Title"] = "Category List";
+}
+
+<div class="card shadow border-0 mt-4">
     <div class="card-header bg-secondary bg-gradient ml-0 py-3">
         <div class="row">
-            <div class="col-12 test-center">
-                <h2 class="text-white py-2">Category List</h2>
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="text-white py-2">Category List</h2>
+                    <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-outline-primary text-white fw-semibold btn-sm text-uppercase bg-gradient">
+                        <small>Back to home</small>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -19,40 +28,20 @@
             </div>
         </div>
 
-        <table class="table table-bordered table-striped">
+        <table id="categoryData" class="table table-bordered table-striped" style="width:100%">
             <thead>
                 <tr>
-                    <th>
-                        Category Name
-                    </th>
-                    <th>
-                        Display Order
-                    </th>
-                    <th></th>
+                    <th>Category Name</th>
+                    <th>Display Order</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var obj in Model.OrderBy(u => u.DisplayOrder))
-                {
-                    <tr>
-                        <td>@obj.Name</td>
-                        <td>
-                            @obj.DisplayOrder
-                        </td>
-                        <td>
-                            <div class="w-75 btn-group" role="group">
-                                <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
-                                    <i class="bi bi-pencil-square"></i> Edit
-                                </a>
-                                <a asp-controller="Category" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger mx-2">
-                                    <i class="bi bi-trash3-fill"></i> Delete
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/Category.js"></script>
+}
+
 

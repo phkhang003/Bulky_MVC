@@ -1,0 +1,72 @@
+﻿@model BulkyBook.Models.Order
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Thay đổi col-md-6 thành col-md-8 và offset-md-3 thành offset-md-2 -->
+            <div class="card shadow border-0 mt-4">
+                <div class="card-header bg-secondary bg-gradient ml-0 py-2">
+                    <div class="row">
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <h2 class="text-white py-2 text-start text-sm-start">Order Confirmation</h2> <!-- Thay đổi text-center thành text-start -->
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary text-white fw-semibold btn-sm text-uppercase bg-gradient">
+                                <small>Back to Home</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="container text-start">
+                        <!-- Thay đổi text-center thành text-start -->
+                        <div class="row">
+                            <div class="col">
+                                <h4 class="fw-bold mb-3 mt-3 text-start text-sm-start"><strong>Thank you for your order!</strong></h4> <!-- Thay đổi text-end thành text-start -->
+                                @if (Model != null)
+                                {
+                                    <p>Your order details:</p>
+                                    <p><strong>Order ID:</strong> @Model.Id</p>
+                                    <p><strong>Order Date:</strong> @Model.OrderDate.ToString("MM/dd/yyyy")</p>
+                                    <p><strong>Order Total:</strong> @Model.OrderTotal.ToString("C2")</p>
+                                    <p><strong>Order Status:</strong> @Model.OrderStatus</p>
+                                    <hr />
+                                    <h5 class="fw-bold mb-3 mt-3 text-start text-sm-start"><strong>Items in your order:</strong></h5> <!-- Thay đổi text-end thành text-start -->
+                                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                                    {
+                                        @foreach (var item in Model.OrderDetails)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Title" class="img-fluid rounded" />
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <p><strong>Product Name:</strong> @item.Product.Title</p>
+                                                    <p><strong>Description:</strong> @Html.Raw(item.Product.Description)</p>
+                                                    <p><strong>Quantity:</strong> @item.Quantity</p>
+                                                    <p><strong>Price:</strong> @item.Price.ToString("C2")</p>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>No items found in your order.</p>
+                                    }
+                                }
+                                else
+                                {
+                                    <p>Order details not found.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
