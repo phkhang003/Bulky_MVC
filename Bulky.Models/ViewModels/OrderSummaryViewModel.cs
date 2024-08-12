@@ -9,7 +9,8 @@ namespace BulkyBook.Models.ViewModels
     public class OrderSummaryViewModel
     {
         public Order Order { get; set; }
-        public IEnumerable<OrderDetail> OrderDetails { get; set; }
+        public List<OrderDetail> OrderDetails { get; set; }
         public string PaymentMethod { get; set; }
+        public double OrderTotal { get; set; }
     }
 }

@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-12 text-center d-flex justify-content-between align-items-center">
                 <h2 class="text-white py-2 text-end text-sm-start">Order Summary</h2>
-                <a href="@Url.Action("Cart", "ShoppingCart")" class="btn btn-outline-primary text-white fw-semibold btn-sm text-uppercase bg-gradient">
+                <a href="@Url.Action("Cart", "ShoppingCart")" class="btn btn-primary fw-semibold btn-sm text-uppercase">
                     <small>Back to cart</small>
                 </a>
             </div>
@@ -25,40 +25,40 @@
                         <div class="form-group row mb-3">
                             <label for="fullName" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Name</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="fullName" name="fullName" class="form-control" value="@Model.Order.ApplicationUser.FullName">
+                                <input type="text" id="fullName" asp-for="Order.ApplicationUser.FullName" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row mb-3">
                             <label for="phone" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Phone</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="phone" name="phone" class="form-control" value="@Model.Order.ApplicationUser.PhoneNumber">
+                                <input type="text" id="phone" asp-for="Order.ApplicationUser.PhoneNumber" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row mb-3">
                             <label for="streetAddress" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Street Address</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="streetAddress" name="streetAddress" class="form-control" value="@Model.Order.ApplicationUser.StreetAddress">
+                                <input type="text" id="streetAddress" asp-for="Order.ApplicationUser.StreetAddress" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row mb-3">
                             <label for="city" class="col-sm-3 col-form-label text-end text-sm-start"><strong>City</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="city" name="city" class="form-control" value="@Model.Order.ApplicationUser.City">
+                                <input type="text" id="city" asp-for="Order.ApplicationUser.City" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row mb-3">
                             <label for="state" class="col-sm-3 col-form-label text-end text-sm-start"><strong>State</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="state" name="state" class="form-control" value="@Model.Order.ApplicationUser.State">
+                                <input type="text" id="state" asp-for="Order.ApplicationUser.State" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row mb-3">
                             <label for="postalCode" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Postal Code</strong></label>
                             <div class="col-sm-9">
-                                <input type="text" id="postalCode" name="postalCode" class="form-control" value="@Model.Order.ApplicationUser.PostalCode">
+                                <input type="text" id="postalCode" asp-for="Order.ApplicationUser.PostalCode" class="form-control">
                             </div>
                         </div>
-
+                        <hr />
                         <div class="mb-3" style="color: midnightblue; text-align: left; font-size: 1.2em;">
                             <p><strong>Estimated Arrival Date: </strong>@Model.Order.OrderDate.AddDays(7).ToString("MM/dd/yyyy") - @Model.Order.OrderDate.AddDays(14).ToString("MM/dd/yyyy")</p>
                         </div>
@@ -87,215 +87,65 @@
                             <span style="color: MidnightBlue; font-weight: bold;">@Model.Order.OrderTotal.ToString("C2")</span>
                         </li>
                     </ol>
+                    <hr />
 
-                    <form id="placeOrderForm" asp-action="CreateOrder" asp-controller="Order" method="post">
-                        <div class="form-group mb-3">
-                            <label for="paymentMethod" class="fw-bold mb-3 mt-3 text-end text-sm-start row" style="font-size: 1.2em;"><strong>Payment Method:</strong></label>
-                            <div class="col-sm-10 d-flex align-items-center">
-                                <div class="form-check form-check-inline me-4" style="font-size: 1.2em;">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="paymentOnDelivery" value="paymentOnDelivery">
-                                    <label class="form-check-label" for="paymentOnDelivery" class="d-flex align-items-center">
-                                        <i class="bi bi-cash-coin me-2" style="font-size: 1.2em;"></i>
-                                        Payment on Delivery
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline" style="font-size: 1.3em;">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="onlinePayment" value="onlinePayment">
-                                    <label class="form-check-label" for="onlinePayment" class="d-flex align-items-center">
-                                        <i class="bi bi-wallet-fill me-2" style="font-size: 1.3em;"></i>
-                                        Online Payment
-                                    </label>
-                                </div>
-                            </div>
-
+                    <form id="orderForm" method="post" asp-action="PlaceOrder" asp-controller="Order">
+                        <input type="hidden" name="OrderTotal" value="@Model.OrderTotal" />
+                        <input type="hidden" name="PaymentMethod" value="@Model.PaymentMethod" />
+                        <div>
+                            <label class="form-check-label me-6" style="font-size: 1.2em;">
+                                <input type="radio" name="PaymentMethod" value="PaymentOnDelivery" checked />
+                                <i class="bi bi-cash-coin me-2" style="font-size: 1.2em;"></i> Payment on Delivery
+                            </label>
+                            <label class="form-check-label me-6" style="font-size: 1.2em;">
+                                <input type="radio" name="PaymentMethod" value="OnlinePayment" />
+                                <i class="bi bi-wallet-fill me-2" style="font-size: 1.3em;"></i> Online Payment
+                            </label>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <div class="col-md-6 d-flex justify-content-end align-items-center">
-                                <button type="submit" id="placeOrderBtn" class="btn btn-primary">Place Order</button>
-                            </div>
-                        </div>
-
+                        <button type="submit" class="btn btn-primary">Place Order</button>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    document.querySelector('#orderForm').addEventListener('submit', function (e) {
+        var paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked').value;
+        if (paymentMethod === 'PaymentOnDelivery') {
+            e.preventDefault();
+            window.location.href = '@Url.Action("PaymentOnDelivery", "Order")';
+        } else {
+            // If payment method is not Payment on Delivery, submit the form to CreateOrder action
+            this.action = '@Url.Action("PlaceOrder", "Order")';
+        }
+    });
+</script>
 
 
 
 
+@* <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const placeOrderForm = document.getElementById("placeOrderForm");
+        const paymentOnDeliveryBtn = document.getElementById("paymentOnDelivery");
+        const onlinePaymentBtn = document.getElementById("onlinePayment");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* @model BulkyBook.Models.ViewModels.OrderSummaryViewModel
-
-<div class="card shadow border-0 mt-4">
-    <div class="card-header bg-secondary bg-gradient ml-0 py-2">
-        <div class="row">
-            <div class="col-12 text-center d-flex justify-content-between align-items-center">
-                <h2 class="text-white py-2 text-end text-sm-start">Order Summary</h2>
-                <a href="@Url.Action("Cart", "ShoppingCart")" class="btn btn-outline-primary text-white fw-semibold btn-sm text-uppercase bg-gradient">
-                    <small>Back to cart</small>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="container text-center">
-        <div class="row">
-            <div class="col">
-                <div class="mb-3">
-                    <h4 class="fw-bold mb-3 mt-3 text-end text-sm-start"><strong>Shipping Details:</strong></h4>
-                    <form asp-action="UpdateShippingDetails" method="post">
-                        <div class="form-group row mb-3">
-                            <label for="fullName" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Name</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="fullName" name="fullName" class="form-control" value="@Model.Order?.ApplicationUser?.FullName ?? string.Empty">
-                            </div>
-                        </div>
-                        <div class="form-group row mb-3">
-                            <label for="phone" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Phone</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="phone" name="phone" class="form-control" value="@Model.Order?.ApplicationUser?.PhoneNumber ?? string.Empty">
-                            </div>
-                        </div>
-                        <div class="form-group row mb-3">
-                            <label for="streetAddress" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Street Address</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="streetAddress" name="streetAddress" class="form-control" value="@Model.Order?.ApplicationUser?.StreetAddress ?? string.Empty">
-                            </div>
-                        </div>
-                        <div class="form-group row mb-3">
-                            <label for="city" class="col-sm-3 col-form-label text-end text-sm-start"><strong>City</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="city" name="city" class="form-control" value="@Model.Order?.ApplicationUser?.City ?? string.Empty">
-                            </div>
-                        </div>
-                        <div class="form-group row mb-3">
-                            <label for="state" class="col-sm-3 col-form-label text-end text-sm-start"><strong>State</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="state" name="state" class="form-control" value="@Model.Order?.ApplicationUser?.State ?? string.Empty">
-                            </div>
-                        </div>
-                        <div class="form-group row mb-3">
-                            <label for="postalCode" class="col-sm-3 col-form-label text-end text-sm-start"><strong>Postal Code</strong></label>
-                            <div class="col-sm-9">
-                                <input type="text" id="postalCode" name="postalCode" class="form-control" value="@Model.Order?.ApplicationUser?.PostalCode ?? string.Empty">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col">
-                <div class="mb-3">
-                    <h4 class="fw-bold mb-3 mt-3 text-end text-sm-start"><strong>Order Summary:</strong></h4>
-                    <ol class="list-group">
-                        @if (Model.OrderDetails != null)
-                        {
-                            @foreach (var item in Model.OrderDetails)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-start text-end text-sm-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">@item.Product?.Title ?? string.Empty</div>
-                                        Quantity: @item.Quantity
-                                    </div>
-                                    <span>@item.Price.ToString("C2")</span>
-                                </li>
-                            }
-                        }
-                        <li class="list-group-item d-flex justify-content-between align-items-start text-end text-sm-start" style="background-color: FloralWhite;">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold">Total(USD)</div>
-                            </div>
-                            <span style="color: MidnightBlue; font-weight: bold;">@Model.Order?.OrderTotal.ToString("C2") ?? "$0.00"</span>
-                        </li>
-                    </ol>
-
-                    <form id="placeOrderForm" asp-action="CreateOrder" asp-controller="Order" method="post">
-                        <div class="form-group row mb-3">
-                            <label for="paymentMethod" class="fw-bold mb-3 mt-3 text-end text-sm-start" style="font-size: 1.2em;"><strong>Payment Method:</strong></label>
-                            <div class="col-sm-9">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="paymentOnDelivery" value="paymentOnDelivery">
-                                    <label class="form-check-label" for="paymentOnDelivery">Payment on Delivery</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="onlinePayment" value="onlinePayment">
-                                    <label class="form-check-label" for="onlinePayment">Online Payment</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3" style="color: midnightblue; text-align: left;">
-                                    @if (Model.Order != null)
-                                    {
-                                        <p><strong>Estimated Arrival Date: </strong>@Model.Order.OrderDate.AddDays(7).ToString("MM/dd/yyyy") - @Model.Order.OrderDate.AddDays(14).ToString("MM/dd/yyyy")</p>
-                                    }
-                                </div>
-                            </div>
-                            <div class="col-md-6 d-flex justify-content-end align-items-center">
-                                <button type="submit" id="placeOrderBtn" class="btn btn-primary">Place Order</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const placeOrderForm = document.getElementById("placeOrderForm");
-            const paymentOnDeliveryBtn = document.getElementById("paymentOnDelivery");
-            const onlinePaymentBtn = document.getElementById("onlinePayment");
-
-            placeOrderForm.addEventListener("submit", function (event) {
+        placeOrderForm.addEventListener("submit", function (event) {
+            if (!paymentOnDeliveryBtn.checked && !onlinePaymentBtn.checked) {
                 event.preventDefault(); // Ngăn chặn form tự động submit
-
-                if (paymentOnDeliveryBtn.checked) {
-                    // Xử lý thanh toán khi nhận hàng
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Your order has been placed successfully!',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            placeOrderForm.submit(); // Submit form sau khi xác nhận
-                        }
-                    });
-                } else if (onlinePaymentBtn.checked) {
-                    // Xử lý thanh toán online
-                    placeOrderForm.submit(); // Submit form cho thanh toán online
-                } else {
-                    // Hiển thị thông báo lỗi nếu chưa chọn phương thức thanh toán
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Please select a payment method.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
+                // Hiển thị thông báo lỗi nếu chưa chọn phương thức thanh toán
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please select a payment method.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
         });
-    </script>
-</div> *@
+    });
+</script>
+ *@

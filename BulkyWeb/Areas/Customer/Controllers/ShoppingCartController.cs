@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -19,7 +20,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        public IActionResult Summary()
+        public IActionResult Summary(string selectedIds)
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (claim == null)
@@ -27,8 +28,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                 return RedirectToAction("Login", "Account", new { area = "Identity" });
             }
 
+            if (string.IsNullOrEmpty(selectedIds))
+            {
+                TempData["error"] = "You haven't selected any products to purchase.";
+                return RedirectToAction(nameof(Cart));
+            }
+
+            var selectedIdList = selectedIds.Split(',').Select(int.Parse).ToList();
             var cartItems = _unitOfWork.CartItem.GetAll(
-                u => u.ApplicationUserId == claim.Value,
+                u => u.ApplicationUserId == claim.Value && selectedIdList.Contains(u.Id),
                 includeProperties: "Product"
             ).ToList();
 
@@ -48,6 +56,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 Order = order,
                 OrderDetails = cartItems.Select(item => new OrderDetail
                 {
+                    ProductId = item.ProductId,
                     Product = item.Product,
                     Quantity = item.Quantity,
                     Price = item.Product.Price
@@ -56,6 +65,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             return View(orderSummaryViewModel);
         }
+
 
         [HttpPost]
         public IActionResult AddToCart(int productId, int quantity)
@@ -206,6 +216,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(Cart));
         }
+
 
         public IActionResult GetCartItemCount()
         {

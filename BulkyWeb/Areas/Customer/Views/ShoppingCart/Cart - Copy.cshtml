@@ -1,4 +1,4 @@
-﻿@model BulkyBook.Models.ShoppingCart
+﻿@* @model BulkyBook.Models.ShoppingCart
 
 @{
     ViewData["Title"] = "Shopping Cart";
@@ -86,7 +86,7 @@
                                                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
                                                 </form>
                                             </div>
-                                        </td>   
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -137,10 +137,9 @@
                 $('.product-checkbox:checked').each(function () {
                     var row = $(this).closest('tr');
                     var priceText = row.find('td:eq(2)').text().trim();
-                    var quantity = parseInt(row.find('input[name="quantity"]').val());
                     var price = parseFloat(priceText.replace(/[^0-9.-]+/g, "")); // Remove currency symbol and format
-                    if (!isNaN(price) && !isNaN(quantity)) {
-                        total += price * quantity; // Calculate total price for this item
+                    if (!isNaN(price)) {
+                        total += price;
                     }
                 });
                 $('.text-dark.fw-semibold.text-uppercase').text('Total (USD): ' + total.toFixed(2));
@@ -249,7 +248,7 @@
             checkIfAllSelected();
         });
     </script>
-
 }
 
 
+ *@

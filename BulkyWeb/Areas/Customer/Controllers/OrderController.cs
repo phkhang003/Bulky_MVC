@@ -1,14 +1,11 @@
-﻿using BulkyBook.DataAccess.Repository.IRepository;
+﻿using Microsoft.AspNetCore.Mvc;
+using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
-using BulkyBook.Utility;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace BulkyBook.Areas.Customer.Controllers
+namespace BulkyBookWeb.Controllers
 {
     [Area("Customer")]
     public class OrderController : Controller
@@ -21,104 +18,143 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateOrder(OrderSummaryViewModel model)
+        public IActionResult PlaceOrder(OrderSummaryViewModel orderSummaryViewModel)
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (claim == null)
+            // Kiểm tra kiểu thanh toán
+            if (orderSummaryViewModel.PaymentMethod == "PaymentOnDelivery")
             {
-                return RedirectToAction("Login", "Account", new { area = "Identity" });
-            }
-
-            var order = new Order
-            {
-                ApplicationUserId = claim.Value,
-                OrderDate = DateTime.Now,
-                OrderTotal = model.Order.OrderTotal,
-                OrderStatus = "Pending",
-                PaymentStatus = "Pending"
-            };
-
-            _unitOfWork.Order.Add(order);
-            _unitOfWork.Save();
-
-            foreach (var item in model.OrderDetails)
-            {
-                var orderDetail = new OrderDetail
+                // Thực hiện lưu đơn hàng vào cơ sở dữ liệu
+                var order = new Order
                 {
-                    OrderId = order.Id,
-                    ProductId = item.Product.Id,
-                    Quantity = item.Quantity,
-                    Price = item.Price
+                    ApplicationUserId = orderSummaryViewModel.Order.ApplicationUserId,
+                    FullName = orderSummaryViewModel.Order.ApplicationUser.FullName,
+                    PhoneNumber = orderSummaryViewModel.Order.ApplicationUser.PhoneNumber,
+                    Email = orderSummaryViewModel.Order.ApplicationUser.Email,
+                    OrderTotal = orderSummaryViewModel.Order.OrderTotal,
+                    OrderStatus = "Pending",
+                    PaymentStatus = "PaymentOnDelivery",
+                    OrderDate = DateTime.Now
                 };
 
-                _unitOfWork.OrderDetail.Add(orderDetail);
+                _unitOfWork.Order.Add(order);
+                _unitOfWork.Save();
+
+                foreach (var item in orderSummaryViewModel.OrderDetails)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderId = order.Id,
+                        ProductId = item.ProductId,
+                        Price = item.Price,
+                        Quantity = item.Quantity
+                    };
+
+                    _unitOfWork.OrderDetail.Add(orderDetail);
+                }
+                _unitOfWork.Save();
+
+                // Chuyển hướng sang trang xác nhận đơn hàng
+                return RedirectToAction("PaymentOnDelivery", "Order", new { id = order.Id });
+            }
+            else if (orderSummaryViewModel.PaymentMethod == "OnlinePayment")
+            {
+                // Chuyển hướng sang trang thanh toán trực tuyến
+                return RedirectToAction("OnlinePayment", "Payment");
             }
 
-            _unitOfWork.Save();
-
-            // Clear the cart after creating the order
-            var cartItems = _unitOfWork.CartItem.GetAll(u => u.ApplicationUserId == claim.Value).ToList();
-            _unitOfWork.CartItem.RemoveRange(cartItems);
-            _unitOfWork.Save();
-
-            // Redirect to the Order Confirmation view
-            return RedirectToAction("OrderConfirmation", new { orderId = order.Id });
+            // Mặc định chuyển hướng sang trang giỏ hàng nếu không có kiểu thanh toán phù hợp
+            return RedirectToAction("Cart", "ShoppingCart");
         }
 
-        public IActionResult OrderConfirmation(int orderId)
+        public IActionResult PaymentOnDelivery(int id)
         {
-            var order = _unitOfWork.Order.GetFirstOrDefault(u => u.Id == orderId, includeProperties: "ApplicationUser");
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
+            var order = _unitOfWork.Order.GetFirstOrDefault(u => u.Id == id, includeProperties: "OrderDetails.Product");
             return View(order);
         }
 
-
-        //[HttpGet]
-        //public IActionResult ManageOrders(int page = 1)
-        //{
-        //    // Lấy UserId của người dùng hiện tại
-        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        //    // Số lượng đơn hàng trên mỗi trang
-        //    int pageSize = 10;
-
-        //    // Lấy danh sách các đơn hàng dựa trên UserId và phân trang
-        //    var orders = _unitOfWork.Order.GetAll(
-        //                    filter: o => o.ApplicationUserId == userId,
-        //                    includeProperties: "ApplicationUser")
-        //                 .OrderBy(o => o.Id) // Sắp xếp theo OrderId tăng dần
-        //                 .Skip((page - 1) * pageSize)
-        //                 .Take(pageSize)
-        //                 .Select(o => new ManageOrdersViewModel
-        //                 {
-        //                     OrderId = o.Id,
-        //                     UserName = o.ApplicationUser.UserName,
-        //                     PhoneNumber = o.ApplicationUser.PhoneNumber,
-        //                     Email = o.ApplicationUser.Email,
-        //                     OrderDate = o.OrderDate,
-        //                     OrderStatus = o.OrderStatus,
-        //                     OrderTotal = o.OrderTotal
-        //                 })
-        //                 .ToList();
-
-        //    // Tính toán số lượng đơn hàng
-        //    int totalCount = _unitOfWork.Order.GetAll(
-        //                        filter: o => o.ApplicationUserId == userId)
-        //                     .Count();
-
-        //    // Tạo đối tượng PaginatedList để truyền dữ liệu sang Razor view
-        //    var viewModel = new PaginatedList<ManageOrdersViewModel>(orders, totalCount, page, pageSize);
-
-        //    return View(viewModel);
-        //}
-
-
+        public IActionResult OnlinePayment()
+        {
+            // Trả về view cho thanh toán trực tuyến
+            return View();
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//[HttpPost]
+//public IActionResult CreateOrder(OrderSummaryViewModel model)
+//{
+//    if (model.Order == null)
+//    {
+//        // Handle null Order case, return an error message or redirect back to the summary page
+//        return RedirectToAction("Summary");
+//    }
+
+//    var claimsIdentity = (ClaimsIdentity)User.Identity;
+//    var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+//    if (claim == null)
+//    {
+//        return RedirectToAction("Login", "Account", new { area = "Identity" });
+//    }
+
+//    var order = new Order
+//    {
+//        ApplicationUserId = claim.Value,
+//        OrderDate = DateTime.Now,
+//        OrderTotal = model.Order.OrderTotal,
+//        OrderStatus = "Pending",
+//        PaymentStatus = "Pending"
+//    };
+
+//    _unitOfWork.Order.Add(order);
+//    _unitOfWork.Save();
+
+//    foreach (var item in model.OrderDetails)
+//    {
+//        var orderDetail = new OrderDetail
+//        {
+//            OrderId = order.Id,
+//            ProductId = item.Product.Id,
+//            Quantity = item.Quantity,
+//            Price = item.Price
+//        };
+
+//        _unitOfWork.OrderDetail.Add(orderDetail);
+//    }
+
+//    _unitOfWork.Save();
+
+//    var cartItems = _unitOfWork.CartItem.GetAll(u => u.ApplicationUserId == claim.Value).ToList();
+//    _unitOfWork.CartItem.RemoveRange(cartItems);
+//    _unitOfWork.Save();
+
+//    return RedirectToAction("OrderConfirmation", "Order", new { orderId = order.Id });
+//}
+
+
+//public IActionResult OrderConfirmation(int orderId)
+//{
+//    var order = _unitOfWork.Order.GetFirstOrDefault(u => u.Id == orderId, includeProperties: "ApplicationUser");
+
+//    if (order == null)
+//    {
+//        return NotFound();
+//    }
+
+//    return View(order);
+//}
