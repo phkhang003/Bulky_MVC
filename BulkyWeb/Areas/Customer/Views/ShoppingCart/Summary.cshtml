@@ -89,7 +89,7 @@
                     </ol>
                     <hr />
 
-                    <form id="orderForm" method="post" asp-action="PlaceOrder" asp-controller="Order">
+                    @* <form id="orderForm" method="post" asp-action="PlaceOrder" asp-controller="Order">
                         <input type="hidden" name="OrderTotal" value="@Model.OrderTotal" />
                         <input type="hidden" name="PaymentMethod" value="@Model.PaymentMethod" />
                         <div>
@@ -104,7 +104,22 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Place Order</button>
+                    </form> *@
+
+                    <form id="placeorderform" action="#" method="post">
+                        <div>
+                            <label class="form-check-label me-6" style="font-size: 1.2em;">
+                                <input type="radio" id="paymentOnDelivery" name="PaymentMethod" value="PaymentOnDelivery" checked />
+                                <i class="bi bi-cash-coin me-2" style="font-size: 1.2em;"></i> Payment on Delivery
+                            </label>
+                            <label class="form-check-label me-6" style="font-size: 1.2em;">
+                                <input type="radio" id="onlinePayment" name="PaymentMethod" value="OnlinePayment" />
+                                <i class="bi bi-wallet-fill me-2" style="font-size: 1.3em;"></i> Online Payment
+                            </label>
+                        </div>
+                        <button type="submit" id="placeorderbtn" class="btn btn-primary">Place Order</button>
                     </form>
+
 
                 </div>
             </div>
@@ -112,7 +127,29 @@
     </div>
 </div>
 
+
+
 <script>
+    document.getElementById('placeorderform').addEventListener('submit', function (event) {
+        event.preventDefault(); // Ngăn chặn form gửi theo cách mặc định
+
+        // Lấy giá trị của phương thức thanh toán đã chọn
+        var paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked').value;
+
+        // Chuyển hướng đến trang phù hợp dựa trên phương thức thanh toán
+        if (paymentMethod === 'PaymentOnDelivery') {
+            window.location.href = '@Url.Action("PaymentOnDelivery", "Order")'; // Thay thế với URL tương ứng
+        } else if (paymentMethod === 'OnlinePayment') {
+            window.location.href = '@Url.Action("OnlinePayment", "Order")'; // Thay thế với URL tương ứng
+        }
+    });
+</script>
+
+
+
+
+
+@* <script>
     document.querySelector('#orderForm').addEventListener('submit', function (e) {
         var paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked').value;
         if (paymentMethod === 'PaymentOnDelivery') {
@@ -124,7 +161,7 @@
         }
     });
 </script>
-
+ *@
 
 
 

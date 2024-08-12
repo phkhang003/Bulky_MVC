@@ -18,60 +18,69 @@ namespace BulkyBookWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult PlaceOrder(OrderSummaryViewModel orderSummaryViewModel)
+        public IActionResult PlaceOrder(OrderSummaryViewModel model)
         {
-            // Kiểm tra kiểu thanh toán
-            if (orderSummaryViewModel.PaymentMethod == "PaymentOnDelivery")
+            if (model.Order == null)
             {
-                // Thực hiện lưu đơn hàng vào cơ sở dữ liệu
-                var order = new Order
+                return RedirectToAction("PaymentOnDelivery");
+            }
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (claim == null)
+            {
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+            }
+
+            var order = new Order
+            {
+                ApplicationUserId = claim.Value,
+                OrderDate = DateTime.Now,
+                OrderTotal = model.Order.OrderTotal,
+                OrderStatus = "Pending",
+                PaymentStatus = "Pending"
+            };
+
+            _unitOfWork.Order.Add(order);
+            _unitOfWork.Save();
+
+            foreach (var item in model.OrderDetails)
+            {
+                var orderDetail = new OrderDetail
                 {
-                    ApplicationUserId = orderSummaryViewModel.Order.ApplicationUserId,
-                    FullName = orderSummaryViewModel.Order.ApplicationUser.FullName,
-                    PhoneNumber = orderSummaryViewModel.Order.ApplicationUser.PhoneNumber,
-                    Email = orderSummaryViewModel.Order.ApplicationUser.Email,
-                    OrderTotal = orderSummaryViewModel.Order.OrderTotal,
-                    OrderStatus = "Pending",
-                    PaymentStatus = "PaymentOnDelivery",
-                    OrderDate = DateTime.Now
+                    OrderId = order.Id,
+                    ProductId = item.Product.Id,
+                    Quantity = item.Quantity,
+                    Price = item.Price
                 };
 
-                _unitOfWork.Order.Add(order);
-                _unitOfWork.Save();
-
-                foreach (var item in orderSummaryViewModel.OrderDetails)
-                {
-                    var orderDetail = new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ProductId = item.ProductId,
-                        Price = item.Price,
-                        Quantity = item.Quantity
-                    };
-
-                    _unitOfWork.OrderDetail.Add(orderDetail);
-                }
-                _unitOfWork.Save();
-
-                // Chuyển hướng sang trang xác nhận đơn hàng
-                return RedirectToAction("PaymentOnDelivery", "Order", new { id = order.Id });
-            }
-            else if (orderSummaryViewModel.PaymentMethod == "OnlinePayment")
-            {
-                // Chuyển hướng sang trang thanh toán trực tuyến
-                return RedirectToAction("OnlinePayment", "Payment");
+                _unitOfWork.OrderDetail.Add(orderDetail);
             }
 
-            // Mặc định chuyển hướng sang trang giỏ hàng nếu không có kiểu thanh toán phù hợp
-            return RedirectToAction("Cart", "ShoppingCart");
+            _unitOfWork.Save();
+
+            var cartItems = _unitOfWork.CartItem.GetAll(u => u.ApplicationUserId == claim.Value).ToList();
+            _unitOfWork.CartItem.RemoveRange(cartItems);
+            _unitOfWork.Save();
+
+            return RedirectToAction("PaymentOnDelivery", "Order", new { orderId = order.Id });
         }
 
-        public IActionResult PaymentOnDelivery(int id)
+        [HttpGet]
+        public IActionResult PaymentOnDelivery(int orderId)
         {
-            var order = _unitOfWork.Order.GetFirstOrDefault(u => u.Id == id, includeProperties: "OrderDetails.Product");
+            var order = _unitOfWork.Order.GetFirstOrDefault(u => u.Id == orderId, includeProperties: "ApplicationUser");
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
             return View(order);
         }
 
+        [HttpGet]
         public IActionResult OnlinePayment()
         {
             // Trả về view cho thanh toán trực tuyến
